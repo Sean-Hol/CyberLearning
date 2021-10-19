@@ -1,0 +1,87 @@
+CREATE TABLE Students (
+	studentID TEXT PRIMARY KEY,
+	firstName TEXT NOT NULL,
+	lastName TEXT NOT NULL,
+	DOB TEXT NOT NULL,
+	email TEXT NOT NULL UNIQUE,
+	phone TEXT NOT NULL UNIQUE
+);
+CREATE TABLE Attendables (
+	attendableID TEXT PRIMARY KEY,
+	date TEXT NOT NULL
+);
+CREATE TABLE Attendance (
+	attendableID TEXT,
+	studentID TEXT,
+	PRIMARY KEY (attendableID , studentID),
+	FOREIGN KEY(attendableID) REFERENCES Attendables(attendableID),
+	FOREIGN KEY(studentID) REFERENCES Students(studentID)
+);
+CREATE TABLE Badges (
+	badgeID TEXT PRIMARY KEY,
+	badgeType TEXT NOT NULL,
+	badgeLevel TEXT NOT NULL
+);
+CREATE TABLE BadgesEarned (
+	badgeID TEXT,
+	studentID TEXT,
+	date TEXT NOT NULL,
+	PRIMARY KEY (badgeID, studentID),
+	FOREIGN KEY(studentID) REFERENCES Students(studentID),
+	FOREIGN KEY(badgeID) REFERENCES Badges(badgeID)
+);
+CREATE TABLE Tests (
+	testID TEXT PRIMARY KEY,
+	badgeID TEXT,
+	testNumber INTEGER NOT NULL,
+	optional INTEGER NOT NULL,
+	requiredTopicsNum INTEGER NOT NULL,
+	FOREIGN KEY(badgeID) REFERENCES Badges(badgeID)
+);
+CREATE TABLE TestsCompleted (
+	testID TEXT,
+	studentID TEXT,
+	date TEXT NOT NULL,
+	PRIMARY KEY (testID, studentID),
+	FOREIGN KEY(studentID) REFERENCES Students(studentID),
+	FOREIGN KEY(testID) REFERENCES Tests(testID)
+);
+CREATE TABLE Topics (
+	topicID TEXT PRIMARY KEY,	
+	testID TEXT,
+	partCount INTEGER NOT NULL,
+	FOREIGN KEY(testID) REFERENCES Tests(testID)
+);
+CREATE TABLE TopicsCompleted (
+	topicID TEXT,
+	studentID TEXT,
+	date TEXT NOT NULL,
+	PRIMARY KEY (topicID, studentID),
+	FOREIGN KEY(studentID) REFERENCES Students(studentID),
+	FOREIGN KEY(topicID) REFERENCES Topics(topicID)
+);
+CREATE TABLE Parts (
+	partID TEXT PRIMARY KEY,
+	topicID TEXT NOT NULL,
+	FOREIGN KEY(topicID) REFERENCES Topics(topicID)
+);
+CREATE TABLE PartsDone (
+	partID TEXT,
+	studentID TEXT,
+	date TEXT NOT NULL,
+	PRIMARY KEY (partID, studentID),
+	FOREIGN KEY(studentID) REFERENCES Students(studentID),
+	FOREIGN KEY(partID) REFERENCES Parts(partID)
+);
+CREATE TABLE CourseworkCovered (
+	attendableID TEXT NOT NULL,
+	partID TEXT,
+	topicID TEXT,
+	testID TEXT,
+	PRIMARY KEY (attendableID, partID, topicID, testID),
+	FOREIGN KEY(attendableID) REFERENCES Attendables(attendableID),
+	FOREIGN KEY(partID) REFERENCES Parts(partID),
+	FOREIGN KEY(topicID) REFERENCES Topics(topicID),
+	FOREIGN KEY(testID) REFERENCES Tests(testID)
+);
+INSERT INTO Students VALUES('0001', 'Sean', 'Holschier', '15/11/2001', 'sean@gmail.com', '911');
