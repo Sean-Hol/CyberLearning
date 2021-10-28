@@ -7,16 +7,25 @@ import java.sql.Statement;
 import java.util.Scanner;
 
 /**
- *
+ * Class Object for Cyber Learning attendance system
  * @author seanh
  */
 public class CyberLearning {
     
+    private String url = "jdbc:sqlite:sqlite/CyberLearning.db";
+    
+    /**
+     * Main method for running the system
+     * @param args 
+     */
     public static void main(String[] args) {
         CyberLearning me = new CyberLearning();
         me.mainMenu();
     }
     
+    /**
+     * Method for the main menu that pops up when system is run
+     */
     public void mainMenu() {
         System.out.println("Welcome to the Cyber Learning Portal");
         System.out.println("Please state the number for the task you wish to complete:");
@@ -28,6 +37,8 @@ public class CyberLearning {
         System.out.println("5-Add Attendance to new Event");
         System.out.println("6-Add new Badge, Test, Topic or Part");
         System.out.println("7-Award Student Badge, Test, Topic or Part");
+        System.out.println("8-View all students");
+        System.out.println("9-View all badges earned");
         String input = scanner.nextLine();
         switch (input) {
             case "1":
@@ -46,8 +57,18 @@ public class CyberLearning {
                 attendance();
                 break;
             case "6":
+                addCourseWork();
                 break;
             case "7":
+                awardCoursework();
+                break;
+            case "8":
+                query("SELECT * FROM Students;");
+                mainMenu();
+                break;
+            case  "9":
+                query("SELECT * FROM BadgesEarned;");
+                mainMenu();
                 break;
             default:
                 System.out.println("Invalid Input, try again");
@@ -55,6 +76,9 @@ public class CyberLearning {
         }
     }
     
+    /**
+     * Method for searching for a student
+     */
     public void searchStudent() {
         Scanner scanner = new Scanner(System.in);
         String IDInput, firstInput, lastInput = "";
@@ -102,6 +126,9 @@ public class CyberLearning {
         mainMenu();
     }
     
+    /**
+     * Method for adding a new student
+     */
     public void addStudent(){
         Scanner scanner = new Scanner(System.in);
         String IDInput, firstInput, lastInput, DOBInput, emailInput, phoneInput = "";
@@ -124,6 +151,9 @@ public class CyberLearning {
         mainMenu();
     }
     
+    /**
+     * Method for deleting student
+     */
     public void deleteStudent() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Student ID of Student to be deleted: ");
@@ -132,13 +162,15 @@ public class CyberLearning {
         String confirm = scanner.nextLine();
         if (confirm.equals("yes")) {
             String sql = "DELETE FROM Students WHERE studentID = '" + IDInput + "';";
-            System.out.println(sql);
             insert(sql);
         }
         System.out.println("");
         mainMenu();
     }
     
+    /**
+     * Method for updating a student
+     */
     public void updateStudent() {
         Scanner scanner = new Scanner(System.in);
         String IDInput, sql = "";
@@ -184,6 +216,9 @@ public class CyberLearning {
         mainMenu();
     }
     
+    /**
+     * Method for marking attendance
+     */
     public void attendance(){
         Scanner scanner = new Scanner(System.in);
         System.out.println("Insert ID for event:");
@@ -203,10 +238,12 @@ public class CyberLearning {
         mainMenu();
     }
     
-    //Not Complete
+    /**
+     * method for adding coursework
+     */
     public void addCourseWork(){
         Scanner scanner = new Scanner(System.in);
-        String sql;
+        String sql, badgeID, testID, topicID, partID;
         System.out.println("Select Coursework type:");
         System.out.println("1-Badge");
         System.out.println("2-Test");
@@ -216,37 +253,118 @@ public class CyberLearning {
         switch (input) {
             case "1":
                 System.out.println("Enter Badge ID:");
-                String badgeID = scanner.nextLine();
+                badgeID = scanner.nextLine();
                 System.out.println("Enter Badge Type (A, S or C:");
                 String badgeType = scanner.nextLine();
                 System.out.println("Enter Badge Level (Lithium, Platinum or Diamond:");
                 String badgeLevel = scanner.nextLine();
-                sql = "INSERT INTO Students VALUES('" + badgeID + "','" + badgeType + "','" + badgeLevel + "');";
+                sql = "INSERT INTO Badges VALUES('" + badgeID + "','" + badgeType + "','" + badgeLevel + "');";
                 insert(sql);
                 break;
             case "2":
                 System.out.println("Enter Test ID:");
-                String testID = scanner.nextLine();
-                System.out.println("Enter Badge Type (A, S or C:");
+                testID = scanner.nextLine();
+                System.out.println("Enter Badge ID:");
                 badgeID = scanner.nextLine();
-                System.out.println("Enter Badge Level (Lithium, Platinum or Diamond:");
-                //String badgeLevel = scanner.nextLine();
-                //sql = "INSERT INTO Students VALUES('" + badgeID + "','" + badgeType + "','" + badgeLevel + "');";
-                //insert(sql);
+                System.out.println("Enter test number for badge:");
+                String testNumber = scanner.nextLine();
+                System.out.println("Enter whether optional test for badge (0-no, 1-yes):");
+                String optional = scanner.nextLine();   
+                System.out.println("Enter number of required topics to pass:");
+                String topicsNum = scanner.nextLine();  
+                sql = "INSERT INTO Tests VALUES('" + testID + "','" + badgeID + "','" + testNumber + "','" + optional + "','" + topicsNum + "');";
+                insert(sql);
                 break;
             case "3":
+                System.out.println("Enter topic ID:");
+                topicID = scanner.nextLine();
+                System.out.println("Enter test ID:");
+                testID = scanner.nextLine(); 
+                System.out.println("Enter number of parts in topic:");
+                String topicNum = scanner.nextLine();  
+                sql = "INSERT INTO Topics VALUES('" + topicID + "','" + testID + "','" + topicNum + "');";
+                insert(sql);
                 break;
             case "4":
+                System.out.println("Enter part ID:");
+                partID = scanner.nextLine();
+                System.out.println("Enter topic ID:");
+                topicID = scanner.nextLine();
+                sql = "INSERT INTO Parts VALUES('" + partID + "','"  + topicID + "');";
+                insert(sql);
                 break;
             default:
                 System.out.println("Invalid input, returning to main menu");
         }
+        mainMenu();
     }
     
+    /**
+     * method for awarding student coursework
+     */
+    public void awardCoursework(){
+        Scanner scanner = new Scanner(System.in);
+        String sql, badgeID, testID, topicID, partID, studentID, date;
+        System.out.println("Select Coursework type to award:");
+        System.out.println("1-Badge");
+        System.out.println("2-Test");
+        System.out.println("3-Topic");
+        System.out.println("4-Part");
+        String input = scanner.nextLine();
+        switch (input) {
+            case "1":
+                System.out.println("Enter Badge ID:");
+                badgeID = scanner.nextLine();
+                System.out.println("Enter Student ID:");
+                studentID = scanner.nextLine();
+                System.out.println("Enter date(dd/mm/yyyy):");
+                date = scanner.nextLine();
+                sql = "INSERT INTO BadgesEarned VALUES('" + badgeID + "','" + studentID + "','" + date + "');";
+                insert(sql);
+                break;
+            case "2":
+                System.out.println("Enter Test ID:");
+                testID = scanner.nextLine();
+                System.out.println("Enter Student ID:");
+                studentID = scanner.nextLine();
+                System.out.println("Enter date(dd/mm/yyyy):");
+                date = scanner.nextLine();
+                sql = "INSERT INTO TestsCompleted VALUES('" + testID + "','" + studentID + "','" + date + "');";
+                insert(sql);
+                break;
+            case "3":
+                System.out.println("Enter Topic ID:");
+                topicID = scanner.nextLine();
+                System.out.println("Enter Student ID:");
+                studentID = scanner.nextLine();
+                System.out.println("Enter date(dd/mm/yyyy):");
+                date = scanner.nextLine();
+                sql = "INSERT INTO TopicsCompleted VALUES('" + topicID + "','" + studentID + "','" + date + "');";
+                insert(sql);
+                break;
+            case "4":
+                System.out.println("Enter Part ID:");
+                partID = scanner.nextLine();
+                System.out.println("Enter Student ID:");
+                studentID = scanner.nextLine();
+                System.out.println("Enter date(dd/mm/yyyy):");
+                date = scanner.nextLine();
+                sql = "INSERT INTO PartsDone VALUES('" + partID + "','" + studentID + "','" + date + "');";
+                insert(sql);
+                break;
+            default:
+                System.out.println("Invalid input, returning to main menu");
+        }
+        mainMenu();
+    }
+    
+    /**
+     * Method for connecting to database
+     * @return 
+     */
     public Connection connect() {
         Connection conn = null;
         try {
-            String url = "jdbc:sqlite:sqlite/CyberLearning.db";
             conn = DriverManager.getConnection(url);
             System.out.println("Connection successfully established");
         } catch (SQLException e) {
@@ -255,6 +373,10 @@ public class CyberLearning {
         return conn;
     }
     
+    /**
+     * method to query database
+     * @param sql 
+     */
     public void query(String sql) {
         try {
             Connection conn = this.connect();
@@ -281,6 +403,10 @@ public class CyberLearning {
         }
     }
     
+    /**
+     * method for inserting into database
+     * @param sql 
+     */
     public void insert(String sql) {
         try {
             Connection conn = this.connect();
@@ -291,6 +417,4 @@ public class CyberLearning {
             System.out.println(e.getMessage());
         }
     }
-    
-    
 }
